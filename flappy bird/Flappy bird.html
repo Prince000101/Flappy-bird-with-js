@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Flappy Bird</title>
+    <style>
+        #canvas {
+            border: 1px solid black;
+        }
+        canvas {
+            padding-left: 0;
+            padding-right: 0;
+            margin-left: auto;
+            margin-right: auto;
+            display: block;
+            width: 800px;
+        }
+    </style>
+</head>
+<body>
+
+        <canvas id="canvas" width="1000px" height="600px" style="margin: auto;"></canvas>
+
+    <script>
+
+// Get the canvas element and its 2D context
+const canvas = document.getElementById("canvas");
+const context = canvas.getContext("2d");
+
+// Define the bird properties
+const birdSize = 40;
+const birdX = canvas.width / 4;
+let birdY = canvas.height / 2;
+
+// Define the bird's velocity and acceleration
+let birdVelocity = 0;
+const birdAcceleration = 0.5;
+
+// Define the gravity and jump force
+const gravity = 5;
+const jumpForce = 100;
+
+// Define the pipe properties
+const pipeWidth = 80;
+const pipeHeight = 300;
+const pipeGap = 250;
+let pipeX = canvas.width;
+let pipeY = 0;
+
+let score = 0;
+
+const birdImage = new Image();
+birdImage.src = 'assets/bird.png';
+
+const pillarImage = new Image();
+pillarImage.src = 'assets/pillarpng.png';
+
+// Function to draw the bird
+function drawBird() {
+    context.drawImage(birdImage, birdX, birdY, birdSize, birdSize);
+}
+
+// Function to draw the pipes
+function drawPipes() {
+    context.drawImage(pillarImage, pipeX, pipeY, pipeWidth, pipeHeight);
+    context.drawImage(
+        pillarImage,
+        pipeX,
+        pipeY + pipeHeight + pipeGap,
+        pipeWidth,
+        canvas.height - pipeY - pipeHeight - pipeGap
+    );
+}
+
+// Function to handle user input
+function handleUserInput(event) {
+    if (event.key === " ") {
+        // When the user presses space, set the bird's velocity to a negative value
+        // This will make it move upwards
+        birdVelocity = -10;
+    }
+}
+
+// Function to update the game state
+function updateGame() {
+    // Update the bird's velocity and position based on acceleration and velocity
+    birdVelocity += birdAcceleration;
+    birdY += birdVelocity;
+
+    // Update the pipe's position
+    pipeX -= 5;
+
+    // Check for collision with the pipes
+    if (
+        birdX + birdSize > pipeX &&
+        birdX < pipeX + pipeWidth &&
+        (birdY < pipeY + pipeHeight || birdY + birdSize > pipeY + pipeHeight + pipeGap)
+    ) {
+        gameOver();
+    }
+
+    // Check for collision with the canvas boundaries
+    if (birdY + birdSize > canvas.height || birdY < 0) {
+        gameOver();
+    }
+
+    // Increment the score if the bird passes the pipe
+    if (pipeX + pipeWidth < birdX) {
+        score++;
+        pipeX = canvas.width;
+        pipeY = Math.random() * (canvas.height - pipeHeight - pipeGap);
+
+        if(score % 15 === 0) {
+            pipeGap -= 10;
+        }
+    }
+}
+
+// Function to draw the score
+function drawScore() {
+    context.fillStyle = "black";
+    context.font = "24px Arial";
+    context.fillText(`Score: ${score}`, 10, 30);
+}
+
+// Function to handle game over
+function gameOver() {
+    clearInterval(gameInterval);
+    alert("Game Over! Your score: " + score);
+    location.reload(); // Reload the page to restart the game
+}
+
+// Add keydown event listener to handle user input
+document.addEventListener("keydown", handleUserInput);
+
+// Start the game
+const gameInterval = setInterval(() => {
+    // Set the fill style to blue
+    context.fillStyle = "blue";
+    // Draw a rectangle that covers the entire canvas
+    context.fillRect(0, 0, canvas.width, canvas.height);
+
+    drawBird();
+    drawPipes();
+    drawScore();     
+    updateGame();
+}, 20);
+
+
+    </script>
+</body>
+</html>
